@@ -5,6 +5,7 @@
 #include 'chatbridge/angelscript/Think'
 #include 'chatbridge/angelscript/ClientPutInServer'
 #include 'chatbridge/angelscript/ClientDisconnect'
+#include 'chatbridge/angelscript/ClientConnected'
 #include 'chatbridge/angelscript/PlayerSpawn'
 #include 'chatbridge/angelscript/PlayerKilled'
 #include 'chatbridge/angelscript/PlayerKilled'

@@ -7,19 +7,29 @@ namespace Think
         CScheduledFunction@ pThink = null;
 
         int flReadDelay = 0;
+        int flStatusDelay = 0;
 
         void GlobalThink()
         {
-            if( flReadDelay > atoi( pJson.get( "INTERVAL_ANGESCRIPT:BOT" ) ) )
+            if( flReadDelay >= atoi( pJson.get( "INTERVAL_ANGESCRIPT:BOT" ) ) )
             {
                 discord_from_server::Write();
-                discord_to_status::Write();
                 discord_to_server::Read();
                 flReadDelay = 0;
             }
             else
             {
                 flReadDelay++;
+            }
+
+            if( flStatusDelay >= atoi( pJson.get( "INTERVAL_STATUS:BOT" ) ) )
+            {
+                discord_to_status::Write();
+                flStatusDelay = 0;
+            }
+            else
+            {
+                flStatusDelay++;
             }
 
             seconds++;

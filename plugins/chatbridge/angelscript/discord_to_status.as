@@ -34,24 +34,29 @@ namespace discord_to_status
                 if( pJson.getboolean( "STATUS_ALIVEPLAYERS:LOG" ) )
                     GetPlayers( t, a );
 
-                if( g_SurvivalMode.IsActive() )
+                if( pJson.getboolean( "STATUS_CHECKPOINTS:LOG" ) )
                     for( CBaseEntity@ cp = g_EntityFuncs.FindEntityByClassname( null, "point_checkpoint" ); cp !is null; c++, @cp = g_EntityFuncs.FindEntityByClassname( cp, "point_checkpoint" ) ) {}
 
-                string m_szTime = ( days > 0 ? string( days ) + ":" : "" );
-                m_szTime += ( hours > 0 ? string( hours ) + ":" : "" );
-                m_szTime += ( minutes > 0 ? string( minutes ) + ":" : "" );
-                m_szTime += string( seconds );
+                string m_szTime = ( days > 0 ? string( days ) + ":" : "" ) + ( hours < 10 ? "0" : "" ) + string( hours ) + ":" + ( minutes < 10 ? "0" : "" ) + string( minutes ) + ":" + ( seconds < 10 ? "0" : "" ) + string( seconds );
+
+                string IP = g_EngineFuncs.CVarGetString( "ip" );
+                if( IP == "localhost" )
+                {
+                    if( g_PlayerFuncs.FindPlayerByIndex( 1 ) !is null )
+                        IP = g_EngineFuncs.GetPlayerAuthId( g_PlayerFuncs.FindPlayerByIndex( 1 ).edict() );
+                }
 
                 pFile.Write( "{\n");
                 pFile.Write( "    \"HOSTNAME\": \"" + g_EngineFuncs.CVarGetString( "hostname" ) + "\",\n" );
+                pFile.Write( "    \"IP\": \"" + g_EngineFuncs.CVarGetString( "ip" ) + "\",\n" );
                 pFile.Write( "    \"MAP\": \"" + string( g_Engine.mapname ) + "\",\n" );
                 if( pJson.getboolean( "STATUS_PLAYERS:LOG" ) )
                     pFile.Write( "    \"PLAYERS\": \"" + string( t ) + "/" + string( g_Engine.maxClients ) + "\",\n" );
                 if( pJson.getboolean( "STATUS_ALIVEPLAYERS:LOG" ) )
-                    pFile.Write( "    \"PLAYERS_ALIVE\": \"" + string( a ) + "/" + string( t ) + "\",\n" );
-                if( g_SurvivalMode.MapSupportEnabled() && pJson.getboolean( "STATUS_CHECKPOINTS:LOG" ) )
-                pFile.Write( "    \"CURRENT_CHECKPOINTS\": \"" + string( c ) + "\",\n" );
-                if( restarts > 0 && pJson.getboolean( "STATUS_RESTARTS:LOG" ) )
+                    pFile.Write( "    \"STATUS_ALIVEPLAYERS\": \"" + string( a ) + "/" + string( t ) + "\",\n" );
+                if( pJson.getboolean( "STATUS_CHECKPOINTS:LOG" ) )
+                    pFile.Write( "    \"CURRENT_CHECKPOINTS\": \"" + string( c ) + "\",\n" );
+                if( pJson.getboolean( "STATUS_RESTARTS:LOG" ) )
                     pFile.Write( "    \"RESTARTS\": \"" + string( restarts ) + "" + "\",\n" );
                 if( pJson.getboolean( "STATUS_MAPTIME:LOG" ) )
                     pFile.Write( "    \"MAPTIME\": \"" + string( m_szTime ) + "\",\n" );

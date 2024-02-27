@@ -3,8 +3,9 @@
         "PREFIX": "!",
         "LANGUAGE": "ENGLISH",
         "INTERVAL_READ_SERVER": 2,
-        "INTERVAL_STATUS": 30,
+        "INTERVAL_STATUS": 20,
         "INTERVAL_ANGESCRIPT": 10,
+        "MESSAGES_PER_SECOND": 3,
         "IP": "",
         "CHANNEL_BRIDGE": "1211204941490688030",
         "CHANNEL_STATUS": "1211210118788554793",
@@ -12,10 +13,15 @@
         "TOKEN": ""
     },
     "COMMANDS": {
-        "say": true
+        "say": true,
+        "changelevel": true,
+        "as_reloadplugin": true,
+        "as_reloadplugins": true,
+        "restart": true
     },
     "LOG": {
         "SERVER_MAPSTART": true,
+        "PLAYER_COUNTRY": true,
         "PLAYERS_START": true,
         "PLAYER_CONNECT": true,
         "PLAYER_DISCONNECT": true,
@@ -30,8 +36,9 @@
         "STATUS_ALIVEPLAYERS": true,
         "STATUS_PLAYERS": true,
         "STATUS_MAPTIME": true,
-        "USER_DELETE_MESSAGE": true,
-        "STATUS_RESTARTS": true
+        "STATUS_RESTARTS": true,
+        "USER_DELETE_MESSAGE": false,
+        "BOT_NOTICE": true
     },
     "EMOTES": {
         "STEAM_0:0:202010794": "<:gatasexo:1016127843928916068>"
@@ -53,6 +60,7 @@
         "MSG_PLAYERS_ALIVE": "Alive players",
         "MSG_MAP": "Map",
         "MSG_SERVER": "Server",
+        "MSG_OFFLINE": "Offline",
         "MSG_RESTARTS": "Restarts",
         "MSG_ALIVE": "Alive",
         "MSG_DEAD": "Dead",
@@ -62,16 +70,15 @@
         "MSG_NOADMIN": "You don't have access to this command.",
         "MSG_ADMIN": "The command has been sent.",
         "MSG_ADMIN_BLACKLIST": "This command is blocked.",
-        "MSG_PLAYER_DEAD": "**dead** :skull_crossbones:",
+        "MSG_PLAYER_DEAD": "**dead** :ghost:",
         "MSG_PLAYER_DIED": "- :skull: ``$name$ died.``",
         "MSG_PLAYER_SUICIDE": "- :skull: ``$name$ commit suicide.``",
-        "MSG_PLAYER_KILLED": "- :skull: ``$name$ has been killed by $killer$.``",
+        "MSG_PLAYER_KILLED": "-  :skull_crossbones: ``$name$ has been killed by $killer$.``",
         "MSG_PLAYER_RESPAWN": "- :man_walking: ``$name$ re-spawned.``",
         "MSG_PLAYER_REVIVED": "- :syringe: ``$name$ were revived.``",
         "MSG_PLAYER_LEAVE": "- :leaves: **$name$ Left the game.**",
-
-
-        "MOD_COMMAND": "- A discord moderator executed command $cmd$",
+        "MSG_MOD_COMMAND": "- A discord moderator executed command $cmd$",
+        "MSG_PLAYER_CONNECTING" : "$name$ is connecting from",
         "IPADDRESS": "IP Address",
         "JOINED": "- :wave: **$name$ Joined the game.**",
         "STARTMAP": "> Map $name$ has started.",

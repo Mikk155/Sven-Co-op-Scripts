@@ -3,6 +3,7 @@ from discord.ext import commands, tasks
 import os
 import asyncio
 import json
+import requests
 
 # BOT Config
 with open('chatbridge.json') as global_config:
@@ -28,7 +29,9 @@ JS_BOT_MODERATOR_ROLE = js_BOT_config.get( "MODERATOR_ROLE", "" )
 
 JS_LOG_CONFIG = json_config.get( "LOG", {} )
 
-lang_msg = JS_LOG_CONFIG.get( JS_BOT_LANGUAGE, {} )
+JS_BOT_NOTICE = bool( JS_LOG_CONFIG.get( "BOT_NOTICE", "" ) )
+
+lang_msg = json_config.get( JS_BOT_LANGUAGE, {} )
 
 USER_DELETE_MESSAGE = bool( JS_LOG_CONFIG.get( "USER_DELETE_MESSAGE", False ) )
 
@@ -42,6 +45,7 @@ MSG_PLAYERS_ALIVE = lang_msg.get( "MSG_PLAYERS_ALIVE", "Alive players" )
 MSG_PLAYERS = lang_msg.get( "MSG_PLAYERS", "Player name" )
 MSG_MAP = lang_msg.get( "MSG_MAP", "Map" )
 MSG_SERVER = lang_msg.get( "MSG_SERVER", "Server" )
+MSG_OFFLINE = lang_msg.get( "MSG_OFFLINE", "Offline" )
 MSG_RESTARTS = lang_msg.get( "MSG_RESTARTS", "Restarts" )
 MSG_MAPTIME = lang_msg.get( "MSG_MAPTIME", "Time on this map" )
 MSG_CHECKPOINTS = lang_msg.get( "MSG_CHECKPOINTS", "" )
@@ -49,7 +53,7 @@ MSG_ADMIN = lang_msg.get ("MSG_ADMIN", "The command has been sent." )
 MSG_ADMIN_BLACKLIST = lang_msg.get( "MSG_ADMIN_BLACKLIST", "This command is blocked." )
 MSG_NOADMIN = lang_msg.get( "MSG_NOADMIN", "You don't have access to this command." )
 
-MSG_IPADDRESS = lang_msg.get("IPADDRESS", "")
+MSG_IPADDRESS = lang_msg.get( "IPADDRESS", "IP Address" )
 
 intents = discord.Intents.default()
 intents.messages = True
@@ -88,6 +92,25 @@ async def ReadScheduler():
         if not first_line or first_line.isspace():
             return
 
+        if first_line.startswith("$"):
+            ConnectedHook = first_line.split( " " )
+
+            if ConnectedHook and ConnectedHook[1]:
+                country = GetCountryName(ConnectedHook[1])
+                flag_emoji = GetCountryEmote(ConnectedHook[1])
+
+                first_line = ""
+
+                for msg in ConnectedHook:
+                    if msg != ConnectedHook[1] and msg != ConnectedHook[0]:
+                        first_line = first_line + msg + " "
+
+                # Idk why it's empty
+                if country:
+                    first_line = first_line + country + " "
+                if flag_emoji:
+                    first_line = first_line + flag_emoji + " "
+
         await channel.send(first_line)
 
 @bot.event
@@ -105,7 +128,8 @@ async def on_ready():
         if os.path.exists(ToStatus):
             os.remove(ToStatus)
 
-        await bot.get_channel(JS_BOT_CHANNEL_BRIDGE).send( MSG_BRIDGE )
+        if JS_BOT_NOTICE:
+            await bot.get_channel(JS_BOT_CHANNEL_BRIDGE).send( MSG_BRIDGE )
 
     if JS_BOT_CHANNEL_STATUS:
         StatusScheduler.start()
@@ -113,7 +137,9 @@ async def on_ready():
         async for message in bot.get_channel( JS_BOT_CHANNEL_STATUS ).history(limit=10):
             if message.author == bot.user:
                 return
-        await bot.get_channel(JS_BOT_CHANNEL_STATUS).send( MSG_STATUS )
+
+        if JS_BOT_NOTICE:
+            await bot.get_channel(JS_BOT_CHANNEL_STATUS).send( MSG_STATUS )
 
 # Bridge messages to the server
 toServer = os.path.join(os.path.dirname(__file__), path_from_discord )
@@ -160,7 +186,7 @@ async def on_message(message):
 
 ToStatus = os.path.join(os.path.dirname(__file__), path_for_status )
 
-@tasks.loop( seconds = JS_BOT_INTERVAL_STATUS )
+@tasks.loop( seconds = JS_BOT_INTERVAL_STATUS + 1 )
 async def StatusScheduler():
 
     await bot.wait_until_ready()
@@ -168,6 +194,17 @@ async def StatusScheduler():
     channel = bot.get_channel( JS_BOT_CHANNEL_STATUS )
 
     if not os.path.exists(ToStatus):
+
+        embed = discord.Embed(
+            title = MSG_SERVER,
+            description = MSG_OFFLINE,
+            color=0xd40004
+        )
+
+        async for message in channel.history(limit=10):
+
+            if message.author == bot.user:
+                await message.edit( embed=embed )
         return
 
     with open(ToStatus) as archivo:
@@ -181,6 +218,7 @@ async def StatusScheduler():
     PLAYERS_CURRENT = status.get( "PLAYERS", "0" )
     STATUS_ALIVEPLAYERS = status.get("STATUS_ALIVEPLAYERS", "")
     CURRENT_CHECKPOINTS = status.get("CURRENT_CHECKPOINTS", "")
+    SERVER_IP = status.get("IP", "")
     RESTARTS = status.get( "RESTARTS", "" )
     MAPTIME = status.get("MAPTIME", "")
 
@@ -207,32 +245,24 @@ async def StatusScheduler():
     )
 
     if MSG_PLAYERS_CONNECTED:
-
         embed.add_field( name = MSG_PLAYERS_CONNECTED + ':', value = PLAYERS_CURRENT, inline = True )
 
     if MSG_PLAYERS_ALIVE and STATUS_ALIVEPLAYERS:
-
         embed.add_field( name = MSG_PLAYERS_ALIVE + ':', value = STATUS_ALIVEPLAYERS, inline=True)
 
     if MSG_CHECKPOINTS and CURRENT_CHECKPOINTS:
-
         embed.add_field( name = MSG_CHECKPOINTS + ':', value=CURRENT_CHECKPOINTS, inline=True)
 
-    if RESTARTS and RESTARTS:
-
+    if MSG_RESTARTS and RESTARTS:
         embed.add_field( name = MSG_RESTARTS + ':', value=RESTARTS, inline=True)
 
     if MSG_MAPTIME and MAPTIME:
-
         embed.add_field( name = MSG_MAPTIME + ':', value=MAPTIME, inline=True)
 
-    if MSG_IPADDRESS and JS_BOT_SERVER_IP:
-
-        embed.add_field( name = MSG_IPADDRESS, value = JS_BOT_SERVER_IP, inline = True )
-
     if MSG_MAP and MAP:
+        embed.add_field( name=MSG_MAP + ':', value= MAP, inline= True )
 
-        embed.add_field( name=MSG_MAP + ':', value= MAP, inline=False )
+    embed.add_field( name = MSG_IPADDRESS, value = SERVER_IP, inline = False )
 
     if status_data:
 
@@ -248,17 +278,15 @@ async def StatusScheduler():
 
             embed.add_field( name = MSG_PLAYER_SCORE, value = PLAYER_SCORES, inline = True )
 
+    os.remove(ToStatus)
+
     # Generate a new message if we're not in JS_BOT_CHANNEL_BRIDGE and if can't find any valid message
     if JS_BOT_CHANNEL_STATUS != JS_BOT_CHANNEL_BRIDGE:
 
-        canal = bot.get_channel( JS_BOT_CHANNEL_STATUS )
-
-        async for message in canal.history(limit=10):
+        async for message in channel.history(limit=10):
 
             if message.author == bot.user:
-
                 await message.edit( embed=embed )
-
                 return
 
     mensaje = await channel.send(embed=embed)
@@ -266,12 +294,27 @@ async def StatusScheduler():
     # If we're on the same channel then delete and re send
     if JS_BOT_CHANNEL_STATUS == JS_BOT_CHANNEL_BRIDGE:
 
-        await asyncio.sleep( JS_BOT_INTERVAL_STATUS )
+        await asyncio.sleep( JS_BOT_INTERVAL_STATUS + 1)
 
         if mensaje:
-
             await mensaje.delete()
+
+def GetCountryEmote(ip):
+    response = requests.get(f"https://ipinfo.io/{ip}/json")
+    data = response.json()
+    country_code = data.get("country")
+    if country_code:
+        return chr(ord(country_code[0]) + 127397) + chr(ord(country_code[1]) + 127397)
+    else:
+        return None
+
+def GetCountryName(ip):
+    response = requests.get(f"https://ipinfo.io/{ip}/json")
+    data = response.json()
+    country_name = data.get("country_name")
+    return country_name
 
 bot.run( JS_BOT_TOKEN )
 
 
+#$ 152.171.75.115 .mk is connecting.
