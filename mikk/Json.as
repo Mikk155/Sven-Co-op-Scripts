@@ -55,7 +55,7 @@ class JSon
 
 class MKJson
 {
-    // prefix: "Mikk.Json.Parse", "Parse", "Json"
+    // prefix: "Mikk.Json.ReadJsonFile", "Parse", "Json"
     // description: Loads and parses a json file for configuring scripts via a JSon@ class
     // body: Mikk.Json
     JSon ReadJsonFile( const string &in m_szPath, JSon@ pJson = null )
@@ -130,7 +130,7 @@ class MKJson
             }
 
             if( value.Find( ",", 0 ) > 0 )
-                value = value.SubString( 0, value.Find( ",", 0 ) );
+                value = value.SubString( 0, value.RFind( ",", 0 ) );
 
             if( groups > 0 )
             {

@@ -1,5 +1,23 @@
 class MKPlayerFuncs
 {
+    // prefix: "Mikk.PlayerFuncs.GetColormap", "GetColormap", "colormap", "bottomcolor", "topcolor", "Hue"
+    // description: Gets bottomcolor and topcolor from the given player as a RGBA values
+    // body: Mikk.PlayerFuncs
+    void GetColormap( CBasePlayer@ pPlayer, RGBA &out TopRGB, RGBA &out BotRGB )
+    {
+        if( pPlayer is null )
+            return;
+
+        uint8 TopUi = pPlayer.pev.colormap & 0x00FF;
+        uint8 BotUi = ( pPlayer.pev.colormap & 0xFF00 ) >> 8;
+
+        float Top_hue = float(TopUi) / 255.0f;
+        float Bot_hue = float(BotUi) / 255.0f;
+
+        TopRGB = HUEtoRGB( Top_hue );
+        BotRGB = HUEtoRGB( Bot_hue );
+    }
+
     // prefix: "Mikk.PlayerFuncs.ClientCommand", "ClientCommand", "Command"
     // description: Executes a console command on the given player or all players if bAllPlayers is true
     // body: Mikk.PlayerFuncs

@@ -5,7 +5,8 @@ def generate_api_snippets():
     path = 'shared.code-snippets'
 
     with open(path, 'w') as p_js:
-        scripts = ['shared', 'Json', 'Language', 'PlayerFuncs', 'Utility']
+        # Todo- hacer que lea shared y los #include
+        scripts = ['shared', 'Json', 'Language', 'PlayerFuncs', 'Utility', 'Hooks' ]
 
         p_js.write("{\n")
         b_coma = False
