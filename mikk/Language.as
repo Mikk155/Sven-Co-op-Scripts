@@ -27,15 +27,15 @@ class MKLanguage
 
         string m_szLanguage = CustomKeyValue( pPlayer, "$s_language" );
 
-        if( m_szLanguage.IsEmpty() )
+        if( m_szLanguage == String::EMPTY_STRING )
             m_szLanguage = "english";
 
         m_szLanguage.ToUppercase();
 
-        string m_szMessage = pJson.get( m_szKey + ";" + m_szLanguage );
+        string m_szMessage = pJson.get( m_szLanguage + ":" + m_szKey );
 
         if( m_szMessage.IsEmpty() )
-            m_szMessage = pJson.get( m_szKey + ";ENGLISH" );
+            m_szMessage = pJson.get( m_szKey + ":ENGLISH" );
 
         if( m_szMessage.IsEmpty() )
             return;
