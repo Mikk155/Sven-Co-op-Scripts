@@ -1,0 +1,9 @@
+{
+    "CONFIG" : {
+        "INSTANT_ENABLE": "true"
+    },
+    "SPAWNED": {
+        "ENGLISH": "Survival mode now active. Only new players will spawn",
+        "SPANISH": "El modo supervivencia a iniciado. Solo apareceran jugadores nuevos."
+    }
+}
